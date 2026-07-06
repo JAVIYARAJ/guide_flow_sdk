@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewTreeLifecycleOwner
+import androidx.lifecycle.findViewTreeLifecycleOwner
 
 /**
  * [TourHost] implementation for an arbitrary [ViewGroup].
@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewTreeLifecycleOwner
  * rather than to a full-screen host (Activity / Fragment).
  *
  * The [LifecycleOwner] is resolved automatically from the view tree via
- * [ViewTreeLifecycleOwner]. You may supply one explicitly if needed.
+ * [findViewTreeLifecycleOwner]. You may supply one explicitly if needed.
  *
  * ```kotlin
  * // Auto-resolve lifecycle from view tree (preferred)
@@ -37,7 +37,7 @@ class ViewHost(
 
     override fun getLifecycleOwner(): LifecycleOwner {
         return lifecycleOwner
-            ?: ViewTreeLifecycleOwner.get(rootView)
+            ?: rootView.findViewTreeLifecycleOwner()
             ?: error(
                 "ViewHost: could not resolve a LifecycleOwner from the view tree. " +
                     "Pass a LifecycleOwner explicitly: ViewHost(view, viewLifecycleOwner).",

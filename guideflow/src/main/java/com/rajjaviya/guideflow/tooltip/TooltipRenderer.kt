@@ -165,9 +165,13 @@ internal class TooltipRenderer(
             TooltipPosition.AUTO -> {} // Already resolved above
         }
 
-        // Clamp to screen edges
-        x = x.coerceIn(margin, containerWidth - tooltipWidth - margin)
-        y = y.coerceIn(margin, containerHeight - tooltipHeight - margin)
+        val minX = margin
+        val maxX = maxOf(minX, containerWidth - tooltipWidth - margin)
+        val minY = margin
+        val maxY = maxOf(minY, containerHeight - tooltipHeight - margin)
+
+        x = x.coerceIn(minX, maxX)
+        y = y.coerceIn(minY, maxY)
 
         view.translationX = x
         view.translationY = y

@@ -29,13 +29,13 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
             LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT,
         )
-        val padding = dpToPx(16)
-        setPadding(padding, padding, padding, padding)
+        val padding = dpToPx(24)
+        setPadding(padding, padding, padding, dpToPx(20))
     }
 
     private val titleView = TextView(context).apply {
-        textSize = 18f
-        setTypeface(null, Typeface.BOLD)
+        textSize = 20f
+        setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL))
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -45,13 +45,14 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
     }
 
     private val descriptionView = TextView(context).apply {
-        textSize = 14f
-        lineHeight = dpToPx(20)
+        textSize = 15f
+        setLineSpacing(dpToPx(4).toFloat(), 1.1f)
+        setTypeface(Typeface.create("sans-serif", Typeface.NORMAL))
         layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
         ).apply {
-            bottomMargin = dpToPx(16)
+            bottomMargin = dpToPx(24)
         }
     }
 
@@ -67,7 +68,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
     private val skipButton = TextView(context).apply {
         text = "Skip"
         textSize = 14f
-        setTypeface(null, Typeface.BOLD)
+        setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL))
         setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
         isClickable = true
         isFocusable = true
@@ -75,9 +76,9 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
     }
 
     private val previousButton = TextView(context).apply {
-        text = "Previous"
+        text = "Back"
         textSize = 14f
-        setTypeface(null, Typeface.BOLD)
+        setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL))
         setPadding(dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8))
         isClickable = true
         isFocusable = true
@@ -90,8 +91,8 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
 
     private val nextButton = TextView(context).apply {
         textSize = 14f
-        setTypeface(null, Typeface.BOLD)
-        setPadding(dpToPx(16), dpToPx(8), dpToPx(16), dpToPx(8))
+        setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL))
+        setPadding(dpToPx(20), dpToPx(10), dpToPx(20), dpToPx(10))
         isClickable = true
         isFocusable = true
     }
@@ -107,8 +108,14 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         buttonsRow.addView(spacer)
         buttonsRow.addView(nextButton)
         
-        // Setup elevation to create a shadow
-        elevation = dpToPx(8).toFloat()
+        // Setup elevation to create a beautiful shadow
+        elevation = dpToPx(16).toFloat()
+        outlineProvider = object : android.view.ViewOutlineProvider() {
+            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, dpToPx(16).toFloat())
+            }
+        }
+        clipToOutline = true
     }
 
     fun bind(
@@ -163,7 +170,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
     }
 
     private fun applyTheme(theme: TourTheme) {
-        val cornerRadius = dpToPx(12).toFloat()
+        val cornerRadius = dpToPx(16).toFloat()
         
         val bgDrawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
@@ -176,23 +183,22 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         descriptionView.setTextColor(theme.tooltipDescriptionColor)
         
         skipButton.setTextColor(theme.skipButtonTextColor)
-        previousButton.setTextColor(theme.skipButtonTextColor) // Re-use skip color for previous
+        previousButton.setTextColor(theme.skipButtonTextColor)
         
         nextButton.setTextColor(theme.nextButtonTextColor)
         
         val nextBgDrawable = GradientDrawable().apply {
             shape = GradientDrawable.RECTANGLE
             setColor(theme.nextButtonColor)
-            setCornerRadius(dpToPx(20).toFloat()) // Pill shape
+            setCornerRadius(dpToPx(24).toFloat()) // Pill shape
         }
         
-        // Simple touch feedback for Next button
         val stateList = StateListDrawable().apply {
             val pressedDrawable = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 setColor(theme.nextButtonColor)
                 alpha = 200 // Slightly dim when pressed
-                setCornerRadius(dpToPx(20).toFloat())
+                setCornerRadius(dpToPx(24).toFloat())
             }
             addState(intArrayOf(android.R.attr.state_pressed), pressedDrawable)
             addState(intArrayOf(), nextBgDrawable)
@@ -202,7 +208,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
 
     private fun android.view.View.addRippleEffect() {
         val outValue = TypedValue()
-        context.theme.resolveAttribute(android.R.attr.selectableItemBackground, outValue, true)
+        context.theme.resolveAttribute(android.R.attr.selectableItemBackgroundBorderless, outValue, true)
         setBackgroundResource(outValue.resourceId)
     }
 }

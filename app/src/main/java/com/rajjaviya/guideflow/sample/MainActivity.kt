@@ -1,89 +1,38 @@
 package com.rajjaviya.guideflow.sample
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.rajjaviya.guideflow.api.GuideFlow
-import com.rajjaviya.guideflow.animation.AnimationType
-import com.rajjaviya.guideflow.model.GuideStep
-import com.rajjaviya.guideflow.model.TourConfig
-import com.rajjaviya.guideflow.model.TourTheme
-import com.rajjaviya.guideflow.spotlight.SpotlightShape
-import com.rajjaviya.guideflow.tooltip.TooltipPosition
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Very simple programmatic UI for the sample app
-        val layout = android.widget.LinearLayout(this).apply {
-            orientation = android.widget.LinearLayout.VERTICAL
-            setPadding(64, 64, 64, 64)
-        }
-        
-        val headerText = TextView(this).apply {
-            text = "Welcome to GuideFlow"
-            textSize = 24f
-            setPadding(0, 0, 0, 64)
-        }
-        
-        val actionButton = Button(this).apply {
-            text = "Tap me"
-        }
-        
-        val startTourButton = Button(this).apply {
-            text = "Start Onboarding Tour"
-            setPadding(0, 100, 0, 0)
-        }
+        setContentView(R.layout.activity_main_dashboard)
 
-        layout.addView(headerText)
-        layout.addView(actionButton)
-        layout.addView(startTourButton)
-        setContentView(layout)
-
-        startTourButton.setOnClickListener {
-            // Using GuideFlow API
-            GuideFlow.with(this)
-                .setTourId("main_demo_tour")
-                .forceShow(true) // Always show it when the button is clicked for the demo
-                .setTheme(TourTheme.dark())
-                .setConfig(
-                    TourConfig(
-                        spotlightShape = SpotlightShape.ROUNDED_RECT,
-                        spotlightPulseAnimation = true,
-                        dismissOnOverlayClick = false
-                    )
-                )
-                .addStep(
-                    GuideStep(
-                        targetView = headerText,
-                        title = "Welcome Header",
-                        description = "This is the main title of our screen.",
-                        tooltipPosition = TooltipPosition.BOTTOM,
-                        animationType = AnimationType.BOUNCE
-                    )
-                )
-                .addStep(
-                    GuideStep(
-                        targetView = actionButton,
-                        title = "Primary Action",
-                        description = "Clicking this button will perform the primary action in the app.",
-                        tooltipPosition = TooltipPosition.BOTTOM,
-                        animationType = AnimationType.FADE
-                    )
-                )
-                .addStep(
-                    GuideStep(
-                        targetView = startTourButton,
-                        title = "Replay Tour",
-                        description = "You can replay this tour at any time by clicking here again.",
-                        tooltipPosition = TooltipPosition.TOP,
-                        animationType = AnimationType.SLIDE_UP
-                    )
-                )
-                .start()
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardActivityDemo).setOnClickListener {
+            startActivity(Intent(this, ActivityDemo::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardFragmentDemo).setOnClickListener {
+            startActivity(Intent(this, FragmentDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardListDemo).setOnClickListener {
+            startActivity(Intent(this, ListDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardDialogDemo).setOnClickListener {
+            DemoBottomSheet().show(supportFragmentManager, "demo_bottom_sheet")
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSpotlightDemo).setOnClickListener {
+            startActivity(Intent(this, SpotlightDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardErrorDemo).setOnClickListener {
+            startActivity(Intent(this, ErrorHandlingDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardNavigationDemo).setOnClickListener {
+            startActivity(Intent(this, NavigationDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardGithub).setOnClickListener {
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/JAVIYARAJ/guide_flow_sdk")))
         }
     }
 }

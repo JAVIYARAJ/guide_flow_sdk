@@ -24,8 +24,6 @@
         <activity android:name=".ActivityDemo" />
         <activity android:name=".FragmentDemoActivity" />
         <activity android:name=".ListDemoActivity" />
-        <activity android:name=".SpotlightDemoActivity" />
-        <activity android:name=".ErrorHandlingDemoActivity" />
-        <activity android:name=".NavigationDemoActivity" />
+
     </application>
 </manifest>

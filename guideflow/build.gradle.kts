@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.vanniktech.publish)
+    id("signing")
 }
 
 android {
@@ -34,12 +35,6 @@ android {
         viewBinding = true
     }
 
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-            withJavadocJar()
-        }
-    }
 }
 
 kotlin {
@@ -70,7 +65,7 @@ ktlint {
 // ---------------------------------------------------------------------------
 mavenPublishing {
     coordinates(
-        groupId = "com.rajjaviya",
+        groupId = "io.github.javiyaraj",
         artifactId = "guideflow",
         version = "1.0.0",
     )
@@ -103,8 +98,26 @@ mavenPublishing {
         }
     }
     
+    // Explicitly enable GPG signing (fixes Missing signature errors)
+    signAllPublications()
+    
     // Publish to both Maven Central and GitHub Packages if environment variables are set
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
+}
+
+// ---------------------------------------------------------------------------
+// GPG Signing Configuration
+// ---------------------------------------------------------------------------
+signing {
+    val keyId = project.findProperty("signing.keyId")?.toString()?.removePrefix("0x")
+    val password = project.findProperty("signing.password")?.toString()
+    
+    // Replace the literal "\n" characters from gradle.properties with actual line breaks
+    val key = project.findProperty("signing.key")?.toString()?.replace("\\n", "\n")
+
+    if (keyId != null && password != null && key != null) {
+        useInMemoryPgpKeys(keyId, key, password)
+    }
 }
 
 dependencies {

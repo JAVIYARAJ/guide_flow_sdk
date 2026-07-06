@@ -6,3 +6,8 @@ plugins {
     alias(libs.plugins.ktlint) apply false
     alias(libs.plugins.vanniktech.publish) apply false
 }
+
+// AGP 9.0+ Built-in Kotlin workaround for Android Studio Sync
+subprojects {
+    tasks.register("prepareKotlinBuildScriptModel") { }
+}

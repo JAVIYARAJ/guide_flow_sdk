@@ -52,17 +52,25 @@ data class TourTheme(
         private val DEFAULT_OVERLAY_COLOR = Color.parseColor("#B3000000") // 70 % black
 
         /** Light theme — white tooltip on a dark overlay (default). */
-        fun light(): TourTheme = TourTheme()
+        fun light(): TourTheme = TourTheme(
+            overlayColor = Color.parseColor("#B30F172A"), // Subtle slate tinted overlay
+            tooltipBackgroundColor = Color.WHITE,
+            tooltipTitleColor = Color.parseColor("#0F172A"), // Slate 900
+            tooltipDescriptionColor = Color.parseColor("#475569"), // Slate 600
+            nextButtonColor = Color.parseColor("#2563EB"), // Blue 600
+            nextButtonTextColor = Color.WHITE,
+            skipButtonTextColor = Color.parseColor("#64748B"), // Slate 500
+        )
 
         /** Dark theme — dark tooltip card, lighter overlay. */
         fun dark(): TourTheme = TourTheme(
             overlayColor = Color.parseColor("#CC000000"),
-            tooltipBackgroundColor = Color.parseColor("#1E1E2E"),
+            tooltipBackgroundColor = Color.parseColor("#1E293B"), // Slate 800
             tooltipTitleColor = Color.WHITE,
-            tooltipDescriptionColor = Color.parseColor("#AAAACC"),
-            nextButtonColor = Color.parseColor("#BB86FC"),
-            nextButtonTextColor = Color.parseColor("#1E1E2E"),
-            skipButtonTextColor = Color.parseColor("#BB86FC"),
+            tooltipDescriptionColor = Color.parseColor("#94A3B8"), // Slate 400
+            nextButtonColor = Color.parseColor("#3B82F6"), // Blue 500
+            nextButtonTextColor = Color.WHITE,
+            skipButtonTextColor = Color.parseColor("#94A3B8"), // Slate 400
         )
 
         /** Material You / dynamic color placeholder — consumers can replace with extracted colors. */

@@ -1,0 +1,20 @@
+# ---------------------------------------------------------------------------
+# Maven Central Publishing Credentials (TEMPLATE)
+# ---------------------------------------------------------------------------
+# Instructions:
+# 1. When you need to publish a new version, copy these keys into your 
+#    GLOBAL gradle.properties (e.g., ~/.gradle/gradle.properties)
+# 2. DO NOT put your actual keys in the local project's gradle.properties 
+#    to avoid accidentally committing them to version control.
+
+# Sonatype Token
+mavenCentralUsername=YOUR_SONATYPE_USERNAME_HERE
+mavenCentralPassword=YOUR_SONATYPE_PASSWORD_HERE
+
+# GPG Signing Info
+signing.keyId=YOUR_8_CHARACTER_KEY_ID_HERE
+signing.password=YOUR_GPG_PASSPHRASE_HERE
+
+# Paste your private GPG key here. 
+# IMPORTANT: It MUST be on a single line! Replace all actual line breaks with \n
+signing.key=-----BEGIN PGP PRIVATE KEY BLOCK-----\n...your...key...here...\n-----END PGP PRIVATE KEY BLOCK-----
