@@ -59,6 +59,8 @@ google-services.json
 # Custom properties files (like secret keys, signing info)
 *.properties
 !gradle.properties
+!gradle/wrapper/gradle-wrapper.properties
+!gradle/gradle-daemon-jvm.properties
 
 # Lint
 lint/intermediates/
