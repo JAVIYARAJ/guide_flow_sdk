@@ -118,6 +118,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         clipToOutline = true
     }
 
+    @Suppress("LongParameterList")
     fun bind(
         step: GuideStep,
         theme: TourTheme,

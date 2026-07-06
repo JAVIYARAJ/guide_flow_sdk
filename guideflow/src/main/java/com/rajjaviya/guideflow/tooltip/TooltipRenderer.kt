@@ -49,10 +49,15 @@ internal class TooltipRenderer(
 
         // We must wait for the TooltipView to measure itself so we know its width/height
         // before we can position it relative to the spotlight.
-        view.measure(
-            android.view.View.MeasureSpec.makeMeasureSpec(overlayContainer.width, android.view.View.MeasureSpec.AT_MOST),
-            android.view.View.MeasureSpec.makeMeasureSpec(overlayContainer.height, android.view.View.MeasureSpec.UNSPECIFIED)
+        val widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(
+            overlayContainer.width,
+            android.view.View.MeasureSpec.AT_MOST
         )
+        val heightSpec = android.view.View.MeasureSpec.makeMeasureSpec(
+            overlayContainer.height,
+            android.view.View.MeasureSpec.UNSPECIFIED
+        )
+        view.measure(widthSpec, heightSpec)
 
         val tooltipWidth = view.measuredWidth
         val tooltipHeight = view.measuredHeight
@@ -96,6 +101,7 @@ internal class TooltipRenderer(
         return view
     }
 
+    @Suppress("LongParameterList", "CyclomaticComplexMethod", "LongMethod")
     private fun positionTooltip(
         view: TooltipView,
         preferredPosition: TooltipPosition,
@@ -153,7 +159,11 @@ internal class TooltipRenderer(
                 x = spotlightBounds.centerX() - (tooltipWidth / 2f)
             }
             TooltipPosition.START -> {
-                val startX = if (isRtl) spotlightBounds.right + spacing else spotlightBounds.left - tooltipWidth - spacing
+                val startX = if (isRtl) {
+                    spotlightBounds.right + spacing
+                } else {
+                    spotlightBounds.left - tooltipWidth - spacing
+                }
                 x = startX
                 y = spotlightBounds.centerY() - (tooltipHeight / 2f)
             }

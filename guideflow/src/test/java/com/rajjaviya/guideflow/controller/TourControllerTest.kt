@@ -9,12 +9,19 @@ import com.rajjaviya.guideflow.model.TourSession
 import com.rajjaviya.guideflow.model.TourState
 import io.mockk.mockk
 import io.mockk.verify
+import io.mockk.every
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
+import android.os.Looper
+import android.graphics.Color
+import androidx.arch.core.executor.ArchTaskExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.After
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -22,6 +29,7 @@ class TourControllerTest {
 
     private lateinit var lifecycleOwner: LifecycleOwner
     private lateinit var lifecycle: LifecycleRegistry
+    private val context = mockk<android.content.Context>(relaxed = true)
 
     private val step1 = mockk<GuideStep>(relaxed = true)
     private val step2 = mockk<GuideStep>(relaxed = true)
@@ -33,13 +41,52 @@ class TourControllerTest {
     private fun makeController(
         session: TourSession,
         listener: TourListener? = null,
-    ) = TourController(session, lifecycleOwner, listener)
+    ) = TourController(
+        session = session,
+        lifecycleOwner = lifecycleOwner,
+        context = context,
+        listener = listener
+    )
 
     @Before
     fun setUp() {
+        mockkStatic(Looper::class)
+        val mainLooper = mockk<Looper>(relaxed = true)
+        every { Looper.getMainLooper() } returns mainLooper
+
+        mockkStatic(ArchTaskExecutor::class)
+        val archTaskExecutor = mockk<ArchTaskExecutor>(relaxed = true)
+        every { ArchTaskExecutor.getInstance() } returns archTaskExecutor
+        every { archTaskExecutor.isMainThread } returns true
+
+        mockkStatic(Color::class)
+        every { Color.parseColor(any()) } answers {
+            val colorString = firstArg<String>()
+            if (colorString.startsWith("#")) {
+                val color = colorString.substring(1).toLong(16)
+                if (colorString.length == 7) {
+                    (0xFF000000L or color).toInt()
+                } else {
+                    color.toInt()
+                }
+            } else {
+                0
+            }
+        }
+
         lifecycle = LifecycleRegistry(mockk(relaxed = true))
-        lifecycleOwner = LifecycleOwner { lifecycle }
+        lifecycleOwner = object : LifecycleOwner {
+            override val lifecycle: Lifecycle
+                get() = this@TourControllerTest.lifecycle
+        }
         lifecycle.currentState = Lifecycle.State.RESUMED
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic(Looper::class)
+        unmockkStatic(ArchTaskExecutor::class)
+        unmockkStatic(Color::class)
     }
 
     @Test

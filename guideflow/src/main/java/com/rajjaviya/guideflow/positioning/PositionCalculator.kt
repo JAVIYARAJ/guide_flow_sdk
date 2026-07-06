@@ -23,6 +23,7 @@ internal object PositionCalculator {
      * Returns an empty [RectF] if either view is not yet laid out or not
      * attached to a window.
      */
+    @Suppress("ReturnCount")
     fun calculate(
         targetView: View,
         overlayView: View,

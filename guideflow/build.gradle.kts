@@ -34,7 +34,6 @@ android {
     buildFeatures {
         viewBinding = true
     }
-
 }
 
 kotlin {
@@ -69,20 +68,20 @@ mavenPublishing {
         artifactId = "guideflow",
         version = "1.0.0",
     )
-    
+
     pom {
         name.set("GuideFlow")
         description.set("A modern, lightweight, and incredibly flexible in-app tour and onboarding SDK for Android.")
         inceptionYear.set("2026")
         url.set("https://github.com/JAVIYARAJ/guide_flow_sdk")
-        
+
         licenses {
             license {
                 name.set("MIT License")
                 url.set("https://opensource.org/licenses/MIT")
             }
         }
-        
+
         developers {
             developer {
                 id.set("rajjaviya")
@@ -90,17 +89,17 @@ mavenPublishing {
                 url.set("https://github.com/rajjaviya")
             }
         }
-        
+
         scm {
             url.set("https://github.com/JAVIYARAJ/guide_flow_sdk")
             connection.set("scm:git:git://github.com/JAVIYARAJ/guide_flow_sdk.git")
             developerConnection.set("scm:git:ssh://git@github.com/JAVIYARAJ/guide_flow_sdk.git")
         }
     }
-    
+
     // Explicitly enable GPG signing (fixes Missing signature errors)
     signAllPublications()
-    
+
     // Publish to both Maven Central and GitHub Packages if environment variables are set
     publishToMavenCentral(com.vanniktech.maven.publish.SonatypeHost.CENTRAL_PORTAL)
 }
@@ -111,7 +110,7 @@ mavenPublishing {
 signing {
     val keyId = project.findProperty("signing.keyId")?.toString()?.removePrefix("0x")
     val password = project.findProperty("signing.password")?.toString()
-    
+
     // Replace the literal "\n" characters from gradle.properties with actual line breaks
     val key = project.findProperty("signing.key")?.toString()?.replace("\\n", "\n")
 

@@ -36,10 +36,7 @@ complexity:
 exceptions:
   active: true
 
-formatting:
-  active: true
-  android: true
-  autoCorrect: true
+
 
 naming:
   active: true
