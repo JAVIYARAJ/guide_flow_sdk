@@ -19,7 +19,7 @@
 
 ```kotlin
 dependencies {
-    implementation("com.rajjaviya:guideflow:1.0.0")
+    implementation("io.github.javiyaraj:guideflow:1.0.0")
 }
 ```
 
