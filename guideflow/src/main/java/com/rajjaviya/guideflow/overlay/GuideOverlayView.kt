@@ -31,6 +31,7 @@ import com.rajjaviya.guideflow.spotlight.SpotlightShape
  * smoothly interpolates from its previous position to the new one via a
  * [ValueAnimator]. This gives a polished step-transition feel.
  */
+@Suppress("TooManyFunctions")
 internal class GuideOverlayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -182,7 +183,11 @@ internal class GuideOverlayView @JvmOverloads constructor(
         blurredBgBitmap = bitmap
         if (blurRenderNode == null) {
             blurRenderNode = android.graphics.RenderNode("GuideBlurNode").apply {
-                setRenderEffect(android.graphics.RenderEffect.createBlurEffect(32f, 32f, android.graphics.Shader.TileMode.CLAMP))
+                setRenderEffect(
+                    android.graphics.RenderEffect.createBlurEffect(
+                        32f, 32f, android.graphics.Shader.TileMode.CLAMP
+                    )
+                )
             }
         }
         blurRenderNode?.apply {

@@ -155,6 +155,7 @@ object GuideFlow {
  * Obtain via [GuideFlow.with]. Every method returns `this` for chaining.
  * Call [start] to launch the tour and receive a [TourManager].
  */
+@Suppress("TooManyFunctions")
 class GuideFlowBuilder internal constructor(private val host: TourHost) {
 
     private val steps = mutableListOf<GuideStep>()

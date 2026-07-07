@@ -104,14 +104,18 @@ internal class OverlayManager(
                 config = session.config,
                 step = state.currentStep,
             ).collect { spotlight ->
-                if (state.currentStep.animationType == com.rajjaviya.guideflow.animation.AnimationType.GLASSMORPHISM && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (state.currentStep.animationType == com.rajjaviya.guideflow.animation.AnimationType.GLASSMORPHISM &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                ) {
                     val root = host.getRootView()
                     val w = root.width
                     val h = root.height
                     if (w > 0 && h > 0) {
                         if (blurredBitmap == null || blurredBitmap!!.width != w || blurredBitmap!!.height != h) {
                             blurredBitmap?.recycle()
-                            blurredBitmap = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
+                            blurredBitmap = android.graphics.Bitmap.createBitmap(
+                                w, h, android.graphics.Bitmap.Config.ARGB_8888
+                            )
                             blurredCanvas = android.graphics.Canvas(blurredBitmap!!)
                         }
                         val prevVisibility = overlay.visibility

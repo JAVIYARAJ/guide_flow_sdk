@@ -27,6 +27,7 @@ internal object TourJsonParser {
      * @param fallbackProvider Optional lambda to manually resolve complex View IDs.
      * @return A list of valid [GuideStep]s.
      */
+    @Suppress("TooGenericExceptionCaught")
     fun parseSteps(
         jsonString: String,
         host: TourHost,
@@ -59,7 +60,9 @@ internal object TourJsonParser {
                 val animationType = parseEnum(animTypeStr, AnimationType.FADE)
                 
                 val shapeStr = stepObj.optString("spotlightShape", "")
-                val spotlightShape = if (shapeStr.isNotEmpty()) parseEnum(shapeStr, SpotlightShape.ROUNDED_RECT) else null
+                val spotlightShape = if (shapeStr.isNotEmpty()) {
+                    parseEnum(shapeStr, SpotlightShape.ROUNDED_RECT)
+                } else null
                 
                 val pointerOffset = stepObj.optDouble("pointerOffset", 0.5).toFloat()
                 
@@ -99,6 +102,7 @@ internal object TourJsonParser {
         return steps
     }
 
+    @Suppress("ReturnCount")
     private fun resolveView(
         targetId: String,
         host: TourHost,
@@ -123,6 +127,7 @@ internal object TourJsonParser {
         return fallbackProvider?.invoke(targetId)
     }
 
+    @Suppress("SwallowedException")
     private inline fun <reified T : Enum<T>> parseEnum(value: String, default: T): T {
         return try {
             java.lang.Enum.valueOf(T::class.java, value.uppercase())

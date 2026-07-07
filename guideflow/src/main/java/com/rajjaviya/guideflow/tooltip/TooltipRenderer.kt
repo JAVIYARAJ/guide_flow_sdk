@@ -27,6 +27,7 @@ internal class TooltipRenderer(
      * Creates (if needed), updates, and positions the tooltip.
      * Must be called AFTER the spotlight bounds are calculated.
      */
+    @Suppress("LongMethod")
     fun render(
         step: GuideStep,
         theme: TourTheme,
@@ -72,8 +73,16 @@ internal class TooltipRenderer(
         
         currentView = view
 
-        val containerWidth = if (overlayContainer.width > 0) overlayContainer.width else overlayContainer.resources.displayMetrics.widthPixels
-        val containerHeight = if (overlayContainer.height > 0) overlayContainer.height else overlayContainer.resources.displayMetrics.heightPixels
+        val containerWidth = if (overlayContainer.width > 0) {
+            overlayContainer.width
+        } else {
+            overlayContainer.resources.displayMetrics.widthPixels
+        }
+        val containerHeight = if (overlayContainer.height > 0) {
+            overlayContainer.height
+        } else {
+            overlayContainer.resources.displayMetrics.heightPixels
+        }
 
         // We must wait for the TooltipView to measure itself so we know its width/height
         // before we can position it relative to the spotlight.
@@ -233,8 +242,9 @@ internal class TooltipRenderer(
         x = x.coerceIn(minX, maxX)
         y = y.coerceIn(minY, maxY)
 
-        // Because TooltipView has margins in its LayoutParams, its internal (0,0) is actually at (margin, margin) visually.
-        // We must subtract the margin from our absolute x and y to position it perfectly in screen space!
+        // Because TooltipView has margins in its LayoutParams, its internal (0,0) is
+        // actually at (margin, margin) visually. We must subtract the margin from our
+        // absolute x and y to position it perfectly in screen space!
         view.translationX = x - margin
         view.translationY = y - margin
         

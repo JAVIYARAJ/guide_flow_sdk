@@ -195,7 +195,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         buttonsRow.addView(nextButton)
     }
 
-    @Suppress("LongParameterList")
+    @Suppress("LongParameterList", "LongMethod", "CyclomaticComplexMethod")
     fun bind(
         step: GuideStep,
         theme: TourTheme,
@@ -207,7 +207,8 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         onSkip: () -> Unit,
     ) {
         // --- Reset Layout for Clean Measurement ---
-        val params = container.layoutParams as? LayoutParams ?: LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        val params = container.layoutParams as? LayoutParams
+            ?: LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
         params.setMargins(0, 0, 0, 0)
         container.layoutParams = params
         arrowView.visibility = GONE
@@ -306,6 +307,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         }
     }
 
+    @Suppress("LongMethod", "CyclomaticComplexMethod", "NestedBlockDepth")
     private fun setupIndicator(
         style: StepIndicatorStyle,
         theme: TourTheme,

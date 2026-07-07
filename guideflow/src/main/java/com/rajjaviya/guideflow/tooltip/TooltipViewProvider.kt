@@ -21,6 +21,7 @@ interface TooltipViewProvider {
      * 
      * @return The [View] to be displayed as the tooltip. You can inflate a new view or recycle an existing one.
      */
+    @Suppress("LongParameterList")
     fun getView(
         context: Context,
         step: GuideStep,
