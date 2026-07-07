@@ -31,12 +31,18 @@ class TourControllerTest {
     private lateinit var lifecycle: LifecycleRegistry
     private val context = mockk<android.content.Context>(relaxed = true)
 
-    private val step1 = mockk<GuideStep>(relaxed = true)
-    private val step2 = mockk<GuideStep>(relaxed = true)
-    private val step3 = mockk<GuideStep>(relaxed = true)
+    private val step1 = mockk<GuideStep>(relaxed = true) {
+        every { condition } returns { true }
+    }
+    private val step2 = mockk<GuideStep>(relaxed = true) {
+        every { condition } returns { true }
+    }
+    private val step3 = mockk<GuideStep>(relaxed = true) {
+        every { condition } returns { true }
+    }
 
     private fun makeSession(vararg steps: GuideStep) =
-        TourSession(steps = steps.toList(), tourId = "test_tour")
+        TourSession(initialSteps = steps.toList(), tourId = "test_tour")
 
     private fun makeController(
         session: TourSession,
