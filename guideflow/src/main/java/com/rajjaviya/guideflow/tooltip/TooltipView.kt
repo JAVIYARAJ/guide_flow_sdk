@@ -206,8 +206,10 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         onPrevious: () -> Unit,
         onSkip: () -> Unit,
     ) {
-        // --- Reset Layout for Clean Measurement ---
-        val params = container.layoutParams as? LayoutParams ?: LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        val params = container.layoutParams as? LayoutParams ?: LayoutParams(
+            LayoutParams.WRAP_CONTENT,
+            LayoutParams.WRAP_CONTENT
+        )
         params.setMargins(0, 0, 0, 0)
         container.layoutParams = params
         arrowView.visibility = GONE
