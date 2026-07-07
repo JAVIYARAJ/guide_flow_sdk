@@ -28,6 +28,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardErrorDemo).setOnClickListener {
             startActivity(Intent(this, ErrorHandlingDemoActivity::class.java))
         }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSmartTourDemo).setOnClickListener {
+            startActivity(Intent(this, SmartTourDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardJsonTourDemo).setOnClickListener {
+            startActivity(Intent(this, JsonTourDemoActivity::class.java))
+        }
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardNavigationDemo).setOnClickListener {
             startActivity(Intent(this, NavigationDemoActivity::class.java))
         }

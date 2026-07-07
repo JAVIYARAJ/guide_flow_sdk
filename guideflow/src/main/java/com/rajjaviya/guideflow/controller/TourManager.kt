@@ -38,7 +38,7 @@ class TourManager internal constructor(
 ) {
 
     private val session = TourSession(
-        steps = steps,
+        initialSteps = steps,
         tourId = tourId,
         theme = theme,
         config = config,
@@ -84,6 +84,21 @@ class TourManager internal constructor(
 
     /** Dismiss the tour at the current step. */
     fun skip() = controller.skip()
+
+    /** 
+     * Dynamically inserts a step into the active tour, immediately after the step with the given tag. 
+     * If the tag is not found, the step is appended to the end.
+     */
+    fun addStepAfter(tag: String, step: GuideStep) {
+        session.addStepAfter(tag, step)
+    }
+
+    /** 
+     * Dynamically removes all steps matching the given tag from the active tour.
+     */
+    fun removeStep(tag: String) {
+        session.removeStep(tag)
+    }
 
     // -------------------------------------------------------------------------
     // Accessors

@@ -32,6 +32,8 @@ import com.rajjaviya.guideflow.spotlight.SpotlightShape
  *                                  or RecyclerView support — Milestone 5+).
  * @property autoAdvanceDelayMs     When > 0, each step auto-advances after this many
  *                                  milliseconds without user interaction. 0 = manual only.
+ * @property resumeWhereLeftOff     If true, checking the tourId will automatically resume
+ *                                  from the last seen step if the tour was interrupted.
  */
 data class TourConfig(
     val dismissOnOverlayClick: Boolean = true,
@@ -44,6 +46,7 @@ data class TourConfig(
     val spotlightPulseAnimation: Boolean = true,
     val scrollToTarget: Boolean = false,
     val autoAdvanceDelayMs: Long = 0L,
+    val resumeWhereLeftOff: Boolean = false,
 ) {
     companion object {
 

@@ -192,11 +192,51 @@ class GuideFlowBuilder internal constructor(private val host: TourHost) {
         apply { steps.addAll(step) }
 
     /**
+     * Inserts a new step into the builder immediately after the step with the given tag.
+     * If the tag is not found, the step is appended to the end.
+     */
+    fun addStepAfter(tag: String, step: GuideStep): GuideFlowBuilder = apply {
+        val index = steps.indexOfFirst { it.tag == tag }
+        if (index != -1) {
+            steps.add(index + 1, step)
+        } else {
+            steps.add(step)
+        }
+    }
+
+    /**
+     * Removes all steps matching the given tag from the builder.
+     */
+    fun removeStep(tag: String): GuideFlowBuilder = apply {
+        steps.removeAll { it.tag == tag }
+    }
+
+    /**
      * Replaces all previously added steps with the provided list.
      */
     fun setSteps(steps: List<GuideStep>): GuideFlowBuilder = apply {
         this.steps.clear()
         this.steps.addAll(steps)
+    }
+
+    /**
+     * Loads and appends a sequence of steps from a JSON string.
+     * This is ideal for remote-driven onboarding flows.
+     * 
+     * @param jsonString The JSON payload containing a "steps" array.
+     * @param viewProvider An optional fallback lambda to manually map string IDs to Views 
+     *                     if they cannot be resolved automatically via Android resources.
+     */
+    fun loadFromJson(
+        jsonString: String, 
+        viewProvider: ((String) -> android.view.View?)? = null
+    ): GuideFlowBuilder = apply {
+        val parsedSteps = com.rajjaviya.guideflow.parser.TourJsonParser.parseSteps(
+            jsonString = jsonString,
+            host = host,
+            fallbackProvider = viewProvider
+        )
+        steps.addAll(parsedSteps)
     }
 
     /**

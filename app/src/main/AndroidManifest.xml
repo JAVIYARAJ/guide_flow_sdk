@@ -27,5 +27,7 @@
         <activity android:name=".SpotlightDemoActivity" />
         <activity android:name=".ErrorHandlingDemoActivity" />
         <activity android:name=".NavigationDemoActivity" />
+        <activity android:name=".SmartTourDemoActivity" />
+        <activity android:name=".JsonTourDemoActivity" />
     </application>
 </manifest>

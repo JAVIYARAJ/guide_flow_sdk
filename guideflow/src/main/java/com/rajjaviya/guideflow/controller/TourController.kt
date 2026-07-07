@@ -69,39 +69,55 @@ internal class TourController(
     // Public control API
     // -------------------------------------------------------------------------
 
-    /** Starts the tour from step 0. No-op if already running. */
+    /** Starts the tour. Resumes from the last saved step if applicable. No-op if already running. */
     fun start() {
         if (_state.value !is TourState.Idle) return
-        currentIndex = 0
+        
+        val savedIndex = if (session.config.resumeWhereLeftOff) {
+            session.tourId?.let { TourPreferences(context).getLastStep(it) } ?: 0
+        } else {
+            0
+        }
+        
+        currentIndex = findNextValidStepIndex(savedIndex)
+        
+        if (currentIndex == -1) {
+            complete()
+            return
+        }
+        
         emitActive()
         listener?.onTourStarted(session)
         listener?.onStepVisible(currentIndex, session.totalSteps)
     }
 
     /**
-     * Advances to the next step.
-     * If the current step is the last one, the tour completes.
+     * Advances to the next step that meets its condition.
+     * If no further steps meet their condition, the tour completes.
      */
     fun next() {
         val active = _state.value as? TourState.Active ?: return
         listener?.onStepCompleted(active.currentIndex)
 
-        if (active.isLastStep) {
+        val nextIndex = findNextValidStepIndex(currentIndex + 1)
+        if (nextIndex == -1) {
             complete()
         } else {
-            currentIndex++
+            currentIndex = nextIndex
             emitActive()
             listener?.onStepVisible(currentIndex, session.totalSteps)
         }
     }
 
     /**
-     * Goes back one step. No-op on the first step.
+     * Goes back to the previous step that meets its condition. No-op if none found.
      */
     fun previous() {
         if (_state.value !is TourState.Active) return
-        if (currentIndex == 0) return
-        currentIndex--
+        val prevIndex = findPreviousValidStepIndex(currentIndex - 1)
+        if (prevIndex == -1) return
+        
+        currentIndex = prevIndex
         emitActive()
         listener?.onStepVisible(currentIndex, session.totalSteps)
     }
@@ -148,10 +164,25 @@ internal class TourController(
     }
 
     private fun emitActive() {
+        session.tourId?.let { TourPreferences(context).saveLastStep(it, currentIndex) }
         _state.value = TourState.Active(
             session = session,
             currentIndex = currentIndex,
             totalSteps = session.totalSteps,
         )
+    }
+
+    private fun findNextValidStepIndex(startIndex: Int): Int {
+        for (i in startIndex until session.totalSteps) {
+            if (session.stepAt(i)?.condition?.invoke() == true) return i
+        }
+        return -1
+    }
+
+    private fun findPreviousValidStepIndex(startIndex: Int): Int {
+        for (i in startIndex downTo 0) {
+            if (session.stepAt(i)?.condition?.invoke() == true) return i
+        }
+        return -1
     }
 }

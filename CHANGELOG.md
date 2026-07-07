@@ -5,6 +5,15 @@ All notable changes to the GuideFlow SDK will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-07-07
+
+### Added
+- **JSON Parameters Documentation:** Expanded `README.md` with a comprehensive table detailing all supported JSON parameters for remote tour configuration.
+- **Enhanced JSON Demo:** Updated `JsonTourDemoActivity` with a rich JSON payload showcasing `spotlightShape`, `animationType`, custom button labels, visibility toggles, and tooltip positioning.
+
+### Fixed
+- Fixed an incorrect view ID target (`btnLike_error` to `btnLike`) in the `JsonTourDemoActivity` JSON payload to ensure the demo tour functions correctly.
+
 ## [1.0.0] - 2026-07-06
 
 ### Added

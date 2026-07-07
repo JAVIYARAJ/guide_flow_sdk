@@ -29,10 +29,24 @@ internal class TourPreferences(context: Context) {
     }
 
     /**
+     * Saves the last seen step index for a tour so it can be resumed later.
+     */
+    fun saveLastStep(tourId: String, stepIndex: Int) {
+        prefs.edit().putInt("${tourId}_last_step", stepIndex).apply()
+    }
+
+    /**
+     * Gets the last seen step index for a tour. Returns 0 if not found.
+     */
+    fun getLastStep(tourId: String): Int {
+        return prefs.getInt("${tourId}_last_step", 0)
+    }
+
+    /**
      * Clears completion status for a specific tour. Useful for testing or resetting state.
      */
     fun clear(tourId: String) {
-        prefs.edit().remove(tourId).apply()
+        prefs.edit().remove(tourId).remove("${tourId}_last_step").apply()
     }
 
     /**

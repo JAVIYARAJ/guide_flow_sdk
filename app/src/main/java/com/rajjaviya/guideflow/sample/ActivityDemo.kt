@@ -100,16 +100,6 @@ class ActivityDemo : AppCompatActivity() {
                     animationType = AnimationType.SLIDE_UP
                 )
             )
-            .addStep(
-                GuideStep(
-                    targetView = findViewById(R.id.fab),
-                    title = "Floating Actions",
-                    description = "Notice how the tooltip elegantly positions itself to the left (START) or top.",
-                    tooltipPosition = TooltipPosition.AUTO,
-                    animationType = AnimationType.BOUNCE,
-                    spotlightShape = SpotlightShape.CIRCLE
-                )
-            )
             .setListener(object : TourListener {
                 override fun onTourCompleted(session: TourSession) {
                     Toast.makeText(this@ActivityDemo, "Tour Completed!", Toast.LENGTH_SHORT).show()

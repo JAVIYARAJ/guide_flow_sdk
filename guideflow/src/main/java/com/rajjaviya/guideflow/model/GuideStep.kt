@@ -35,5 +35,6 @@ data class GuideStep(
     val previousButtonLabel: String = "Back",
     val pointerOffset: Float = 0.5f,
     val spotlightShape: SpotlightShape? = null,
+    val condition: () -> Boolean = { true },
     val tag: String? = null,
 )
