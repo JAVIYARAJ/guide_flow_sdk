@@ -23,15 +23,66 @@ import com.rajjaviya.guideflow.util.dpToPx
  */
 internal class TooltipView(context: Context) : FrameLayout(context) {
 
+    private class ArrowView(context: Context) : android.view.View(context) {
+        val path = android.graphics.Path()
+        val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+            style = android.graphics.Paint.Style.FILL
+        }
+        var direction: TooltipPosition = TooltipPosition.TOP
+        
+        fun setArrow(color: Int, position: TooltipPosition) {
+            paint.color = color
+            direction = position
+            invalidate()
+        }
+
+        override fun onDraw(canvas: android.graphics.Canvas) {
+            path.reset()
+            val w = width.toFloat()
+            val h = height.toFloat()
+            when (direction) {
+                TooltipPosition.BOTTOM -> { // Tooltip is BELOW, arrow points UP
+                    path.moveTo(0f, h)
+                    path.lineTo(w / 2, 0f)
+                    path.lineTo(w, h)
+                }
+                TooltipPosition.TOP -> { // Tooltip is ABOVE, arrow points DOWN
+                    path.moveTo(0f, 0f)
+                    path.lineTo(w / 2, h)
+                    path.lineTo(w, 0f)
+                }
+                TooltipPosition.END -> { // Tooltip is to the RIGHT, arrow points LEFT
+                    path.moveTo(w, 0f)
+                    path.lineTo(0f, h / 2)
+                    path.lineTo(w, h)
+                }
+                TooltipPosition.START -> { // Tooltip is to the LEFT, arrow points RIGHT
+                    path.moveTo(0f, 0f)
+                    path.lineTo(w, h / 2)
+                    path.lineTo(0f, h)
+                }
+                else -> {}
+            }
+            path.close()
+            canvas.drawPath(path, paint)
+        }
+    }
+
     private val container = LinearLayout(context).apply {
         orientation = LinearLayout.VERTICAL
-        layoutParams = LayoutParams(
-            LayoutParams.WRAP_CONTENT,
-            LayoutParams.WRAP_CONTENT,
-        )
         val padding = dpToPx(24)
         setPadding(padding, padding, padding, dpToPx(20))
+        
+        elevation = dpToPx(16).toFloat()
+        outlineProvider = object : android.view.ViewOutlineProvider() {
+            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
+                outline.setRoundRect(0, 0, view.width, view.height, dpToPx(16).toFloat())
+            }
+        }
+        clipToOutline = true
     }
+    
+    private val arrowView = ArrowView(context)
 
     private val titleView = TextView(context).apply {
         textSize = 20f
@@ -98,7 +149,12 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
     }
 
     init {
+        clipChildren = false
+        clipToPadding = false
+        
+        addView(arrowView) // Add arrow first so it draws BEHIND the container
         addView(container)
+        
         container.addView(titleView)
         container.addView(descriptionView)
         container.addView(buttonsRow)
@@ -107,15 +163,6 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         buttonsRow.addView(previousButton)
         buttonsRow.addView(spacer)
         buttonsRow.addView(nextButton)
-        
-        // Setup elevation to create a beautiful shadow
-        elevation = dpToPx(16).toFloat()
-        outlineProvider = object : android.view.ViewOutlineProvider() {
-            override fun getOutline(view: android.view.View, outline: android.graphics.Outline) {
-                outline.setRoundRect(0, 0, view.width, view.height, dpToPx(16).toFloat())
-            }
-        }
-        clipToOutline = true
     }
 
     @Suppress("LongParameterList")
@@ -129,6 +176,12 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         onPrevious: () -> Unit,
         onSkip: () -> Unit,
     ) {
+        // --- Reset Layout for Clean Measurement ---
+        val params = container.layoutParams as? LayoutParams ?: LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        params.setMargins(0, 0, 0, 0)
+        container.layoutParams = params
+        arrowView.visibility = GONE
+
         // --- Content ---
         if (step.title.isNullOrBlank()) {
             titleView.visibility = GONE
@@ -144,10 +197,23 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
             descriptionView.text = step.description
         }
 
-        nextButton.text = if (isLastStep) "Finish" else "Next"
+        if (step.showNextButton) {
+            nextButton.visibility = VISIBLE
+            nextButton.text = if (isLastStep) "Finish" else step.nextButtonLabel
+        } else {
+            nextButton.visibility = GONE
+        }
+
+        if (step.showSkipButton && !isLastStep) {
+            skipButton.visibility = VISIBLE
+            skipButton.text = step.skipButtonLabel
+        } else {
+            skipButton.visibility = GONE
+        }
 
         // --- Configuration ---
         previousButton.visibility = if (config.enablePreviousButton && !isFirstStep) VISIBLE else GONE
+        previousButton.text = step.previousButtonLabel
         
         // If they click on the tooltip itself, don't let the touch fall through to the overlay
         setOnClickListener { }
@@ -159,7 +225,6 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
 
         // --- Theming ---
         applyTheme(theme)
-        
         // --- Accessibility ---
         val announcement = buildString {
             if (!step.title.isNullOrBlank()) append(step.title).append(". ")
@@ -170,6 +235,70 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         }
     }
 
+    fun setupArrow(position: TooltipPosition, offset: Float, theme: TourTheme) {
+        val arrowWidth = dpToPx(24) // Base width
+        val arrowHeight = dpToPx(16) // Height of the triangle
+        
+        val isVertical = position == TooltipPosition.TOP || position == TooltipPosition.BOTTOM
+        val viewWidth = if (isVertical) arrowWidth else arrowHeight
+        val viewHeight = if (isVertical) arrowHeight else arrowWidth
+        
+        val arrowParams = LayoutParams(viewWidth, viewHeight)
+        val containerParams = LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT)
+        
+        // Coerce the arrow so it doesn't render outside the tooltip bounds
+        // measuredWidth/Height here is exactly the container's size since we reset margins in bind()
+        val safeLeft = offset.toInt().coerceIn(viewWidth, (measuredWidth - viewWidth).coerceAtLeast(viewWidth))
+        val safeTop = offset.toInt().coerceIn(viewHeight, (measuredHeight - viewHeight).coerceAtLeast(viewHeight))
+
+        val overlap = dpToPx(3) // Overlap to hide the seam seamlessly
+        
+        var shiftX = 0f
+        var shiftY = 0f
+
+        when (position) {
+            TooltipPosition.BOTTOM -> {
+                val margin = viewHeight - overlap
+                containerParams.topMargin = margin
+                arrowParams.gravity = Gravity.TOP or Gravity.LEFT
+                arrowParams.leftMargin = safeLeft - (viewWidth / 2)
+                shiftY = -margin.toFloat()
+            }
+            TooltipPosition.TOP -> {
+                containerParams.bottomMargin = viewHeight - overlap
+                arrowParams.gravity = Gravity.BOTTOM or Gravity.LEFT
+                arrowParams.leftMargin = safeLeft - (viewWidth / 2)
+                // Container stays at visual Y, no shift needed
+            }
+            TooltipPosition.END -> {
+                val margin = viewWidth - overlap
+                containerParams.leftMargin = margin
+                arrowParams.gravity = Gravity.LEFT or Gravity.TOP
+                arrowParams.topMargin = safeTop - (viewHeight / 2)
+                shiftX = -margin.toFloat()
+            }
+            TooltipPosition.START -> {
+                containerParams.rightMargin = viewWidth - overlap
+                arrowParams.gravity = Gravity.RIGHT or Gravity.TOP
+                arrowParams.topMargin = safeTop - (viewHeight / 2)
+                // Container stays at visual X, no shift needed
+            }
+            else -> {
+                arrowView.visibility = GONE
+            }
+        }
+        
+        // Compensate the tooltip translation so the container's visual position exactly matches 
+        // what TooltipRenderer calculated before the arrow margins were added.
+        translationX += shiftX
+        translationY += shiftY
+        
+        arrowView.visibility = VISIBLE
+        arrowView.layoutParams = arrowParams
+        container.layoutParams = containerParams
+        arrowView.setArrow(theme.tooltipBackgroundColor, position)
+    }
+
     private fun applyTheme(theme: TourTheme) {
         val cornerRadius = dpToPx(16).toFloat()
         
@@ -178,7 +307,7 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
             setColor(theme.tooltipBackgroundColor)
             setCornerRadius(cornerRadius)
         }
-        background = bgDrawable
+        container.background = bgDrawable
 
         titleView.setTextColor(theme.tooltipTitleColor)
         descriptionView.setTextColor(theme.tooltipDescriptionColor)

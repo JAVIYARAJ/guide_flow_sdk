@@ -94,6 +94,7 @@ internal class OverlayManager(
                 targetView = state.currentStep.targetView,
                 overlayView = overlay,
                 config = session.config,
+                step = state.currentStep,
             ).collect { spotlight ->
                 // isFirstStep flag skips animation on the very first step.
                 overlay.updateSpotlight(

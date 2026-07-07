@@ -2,6 +2,7 @@ package com.rajjaviya.guideflow.positioning
 
 import android.util.Log
 import android.view.View
+import com.rajjaviya.guideflow.model.GuideStep
 import com.rajjaviya.guideflow.model.TourConfig
 import com.rajjaviya.guideflow.spotlight.SpotlightBounds
 import com.rajjaviya.guideflow.spotlight.SpotlightCalculator
@@ -55,6 +56,7 @@ internal object ViewResolver {
         targetView: View,
         overlayView: View,
         config: TourConfig,
+        step: GuideStep,
     ): Flow<SpotlightBounds> = callbackFlow<SpotlightBounds> {
 
         // Step 1 — wait for the view to be ready before registering the layout observer
@@ -64,18 +66,18 @@ internal object ViewResolver {
         AutoScroller.scrollToTargetIfNeeded(targetView, config)
 
         // Step 2 — calculate and emit immediately
-        trySend(resolveBounds(targetView, overlayView, config))
+        trySend(resolveBounds(targetView, overlayView, config, step))
 
         // Step 3 — watch for layout changes and re-emit
         val observer = ViewLayoutObserver(targetView) {
-            trySend(resolveBounds(targetView, overlayView, config))
+            trySend(resolveBounds(targetView, overlayView, config, step))
         }
         observer.start()
 
         // Step 4 — handle attach/detach
         val attachListener = object : View.OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View) {
-                trySend(resolveBounds(v, overlayView, config))
+                trySend(resolveBounds(v, overlayView, config, step))
             }
 
             override fun onViewDetachedFromWindow(v: View) {
@@ -116,6 +118,7 @@ internal object ViewResolver {
         targetView: View,
         overlayView: View,
         config: TourConfig,
+        step: GuideStep,
     ): SpotlightBounds {
         val issue = detectIssue(targetView)
         if (issue != null) {
@@ -127,7 +130,7 @@ internal object ViewResolver {
             targetView = targetView,
             overlayView = overlayView,
             config = config,
-            shape = config.spotlightShape,
+            shape = step.spotlightShape ?: config.spotlightShape,
         )
     }
 }

@@ -3,6 +3,7 @@ package com.rajjaviya.guideflow.model
 import android.view.View
 import com.rajjaviya.guideflow.animation.AnimationType
 import com.rajjaviya.guideflow.tooltip.TooltipPosition
+import com.rajjaviya.guideflow.spotlight.SpotlightShape
 
 /**
  * Represents a single step in a GuideFlow tour.
@@ -16,6 +17,9 @@ import com.rajjaviya.guideflow.tooltip.TooltipPosition
  * @property nextButtonLabel  Custom label for the next button.
  * @property showSkipButton   Whether to show a "Skip" button.
  * @property skipButtonLabel  Custom label for the skip button.
+ * @property previousButtonLabel Custom label for the previous/back button.
+ * @property pointerOffset    Offset (0.0 to 1.0) of where the arrow points on the spotlight. Default 0.5 (center).
+ * @property spotlightShape   Optional shape for this step's spotlight. Overrides the global TourConfig shape if provided.
  * @property tag              Optional identifier for analytics or testing.
  */
 data class GuideStep(
@@ -28,5 +32,8 @@ data class GuideStep(
     val nextButtonLabel: String = "Next",
     val showSkipButton: Boolean = true,
     val skipButtonLabel: String = "Skip",
+    val previousButtonLabel: String = "Back",
+    val pointerOffset: Float = 0.5f,
+    val spotlightShape: SpotlightShape? = null,
     val tag: String? = null,
 )

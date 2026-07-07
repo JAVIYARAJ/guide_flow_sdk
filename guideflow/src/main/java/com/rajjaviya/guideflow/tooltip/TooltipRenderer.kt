@@ -47,14 +47,18 @@ internal class TooltipRenderer(
             onSkip = onSkip,
         )
 
+        val containerWidth = if (overlayContainer.width > 0) overlayContainer.width else overlayContainer.resources.displayMetrics.widthPixels
+        val containerHeight = if (overlayContainer.height > 0) overlayContainer.height else overlayContainer.resources.displayMetrics.heightPixels
+
         // We must wait for the TooltipView to measure itself so we know its width/height
         // before we can position it relative to the spotlight.
+        val marginPx = (16 * overlayContainer.resources.displayMetrics.density).toInt()
         val widthSpec = android.view.View.MeasureSpec.makeMeasureSpec(
-            overlayContainer.width,
+            containerWidth - (2 * marginPx),
             android.view.View.MeasureSpec.AT_MOST
         )
         val heightSpec = android.view.View.MeasureSpec.makeMeasureSpec(
-            overlayContainer.height,
+            containerHeight,
             android.view.View.MeasureSpec.UNSPECIFIED
         )
         view.measure(widthSpec, heightSpec)
@@ -66,11 +70,13 @@ internal class TooltipRenderer(
             view = view,
             preferredPosition = step.tooltipPosition,
             spotlightBounds = spotlight.bounds,
-            containerWidth = overlayContainer.width,
-            containerHeight = overlayContainer.height,
+            containerWidth = containerWidth,
+            containerHeight = containerHeight,
             tooltipWidth = tooltipWidth,
             tooltipHeight = tooltipHeight,
             animationType = step.animationType,
+            theme = theme,
+            pointerOffset = step.pointerOffset,
         )
     }
 
@@ -92,7 +98,8 @@ internal class TooltipRenderer(
             FrameLayout.LayoutParams.WRAP_CONTENT,
             FrameLayout.LayoutParams.WRAP_CONTENT,
         )
-        // Ensure tooltip has margin from screen edges
+        // Add margins so the Android layout pass inherently restricts the width to screenWidth - 32dp.
+        // This is necessary to prevent the view from exceeding the screen bounds during measurement.
         val margin = (16 * overlayContainer.resources.displayMetrics.density).toInt()
         params.setMargins(margin, margin, margin, margin)
         
@@ -111,6 +118,8 @@ internal class TooltipRenderer(
         tooltipWidth: Int,
         tooltipHeight: Int,
         animationType: com.rajjaviya.guideflow.animation.AnimationType,
+        theme: TourTheme,
+        pointerOffset: Float,
     ) {
         // If there's no spotlight (e.g. view not found), just center it
         if (spotlightBounds.isEmpty) {
@@ -122,7 +131,7 @@ internal class TooltipRenderer(
         val isRtl = ViewCompat.getLayoutDirection(overlayContainer) == ViewCompat.LAYOUT_DIRECTION_RTL
         
         val margin = (16 * overlayContainer.resources.displayMetrics.density)
-        val spacing = (12 * overlayContainer.resources.displayMetrics.density) // Space between spotlight and tooltip
+        val spacing = (24 * overlayContainer.resources.displayMetrics.density) // Space between spotlight and tooltip
 
         // Calculate available space on each side
         val spaceTop = spotlightBounds.top
@@ -130,9 +139,24 @@ internal class TooltipRenderer(
         val spaceStart = if (isRtl) containerWidth - spotlightBounds.right else spotlightBounds.left
         val spaceEnd = if (isRtl) spotlightBounds.left else containerWidth - spotlightBounds.right
 
+        val safePointerOffset = pointerOffset.coerceIn(0f, 1f)
+
+        // Ensure preferred position actually fits on screen
+        var position = preferredPosition
+        if (position != TooltipPosition.AUTO) {
+            val fits = when (position) {
+                TooltipPosition.BOTTOM -> spaceBottom >= tooltipHeight + spacing + margin
+                TooltipPosition.TOP -> spaceTop >= tooltipHeight + spacing + margin
+                TooltipPosition.END -> spaceEnd >= tooltipWidth + spacing + margin
+                TooltipPosition.START -> spaceStart >= tooltipWidth + spacing + margin
+                else -> true
+            }
+            if (!fits) position = TooltipPosition.AUTO
+        }
+
         // Determine actual position
-        val position = if (preferredPosition == TooltipPosition.AUTO) {
-            when {
+        if (position == TooltipPosition.AUTO) {
+            position = when {
                 spaceBottom >= tooltipHeight + spacing + margin -> TooltipPosition.BOTTOM
                 spaceTop >= tooltipHeight + spacing + margin -> TooltipPosition.TOP
                 spaceEnd >= tooltipWidth + spacing + margin -> TooltipPosition.END
@@ -142,21 +166,22 @@ internal class TooltipRenderer(
                     if (spaceBottom > spaceTop) TooltipPosition.BOTTOM else TooltipPosition.TOP
                 }
             }
-        } else {
-            preferredPosition
         }
 
         var x = 0f
         var y = 0f
+        
+        val pointerX = spotlightBounds.left + (spotlightBounds.width() * safePointerOffset)
+        val pointerY = spotlightBounds.top + (spotlightBounds.height() * safePointerOffset)
 
         when (position) {
             TooltipPosition.TOP -> {
                 y = spotlightBounds.top - tooltipHeight - spacing
-                x = spotlightBounds.centerX() - (tooltipWidth / 2f)
+                x = pointerX - (tooltipWidth / 2f)
             }
             TooltipPosition.BOTTOM -> {
                 y = spotlightBounds.bottom + spacing
-                x = spotlightBounds.centerX() - (tooltipWidth / 2f)
+                x = pointerX - (tooltipWidth / 2f)
             }
             TooltipPosition.START -> {
                 val startX = if (isRtl) {
@@ -165,12 +190,12 @@ internal class TooltipRenderer(
                     spotlightBounds.left - tooltipWidth - spacing
                 }
                 x = startX
-                y = spotlightBounds.centerY() - (tooltipHeight / 2f)
+                y = pointerY - (tooltipHeight / 2f)
             }
             TooltipPosition.END -> {
                 val endX = if (isRtl) spotlightBounds.left - tooltipWidth - spacing else spotlightBounds.right + spacing
                 x = endX
-                y = spotlightBounds.centerY() - (tooltipHeight / 2f)
+                y = pointerY - (tooltipHeight / 2f)
             }
             TooltipPosition.AUTO -> {} // Already resolved above
         }
@@ -183,8 +208,21 @@ internal class TooltipRenderer(
         x = x.coerceIn(minX, maxX)
         y = y.coerceIn(minY, maxY)
 
-        view.translationX = x
-        view.translationY = y
+        // Because TooltipView has margins in its LayoutParams, its internal (0,0) is actually at (margin, margin) visually.
+        // We must subtract the margin from our absolute x and y to position it perfectly in screen space!
+        view.translationX = x - margin
+        view.translationY = y - margin
+        
+        // Calculate offset for the arrow so it points directly at the pointer coordinate
+        val isHorizontal = position == TooltipPosition.START || position == TooltipPosition.END
+        val arrowOffset = if (isHorizontal) {
+            pointerY - y
+        } else {
+            pointerX - x
+        }
+        
+        // We pass the position resolved here (e.g. TooltipPosition.BOTTOM means tooltip is below the view)
+        view.setupArrow(position, arrowOffset, theme)
         
         com.rajjaviya.guideflow.animation.StepAnimator.animateEnter(view, animationType)
 

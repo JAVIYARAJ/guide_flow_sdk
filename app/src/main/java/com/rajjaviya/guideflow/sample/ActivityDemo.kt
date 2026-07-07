@@ -58,8 +58,9 @@ class ActivityDemo : AppCompatActivity() {
                     targetView = findViewById(R.id.toolbar),
                     title = "App Toolbar",
                     description = "This spotlight highlights the entire toolbar cleanly.",
-                    tooltipPosition = TooltipPosition.BOTTOM,
-                    animationType = AnimationType.SLIDE_UP
+                    tooltipPosition = TooltipPosition.AUTO,
+                    animationType = AnimationType.SLIDE_UP,
+                    pointerOffset = 0.9f,
                 )
             )
             .addStep(
@@ -86,7 +87,8 @@ class ActivityDemo : AppCompatActivity() {
                     title = "Profile Icon",
                     description = "Perfect for profile pictures.",
                     tooltipPosition = TooltipPosition.START,
-                    animationType = AnimationType.SLIDE_UP
+                    animationType = AnimationType.SLIDE_UP,
+                    spotlightShape = SpotlightShape.CIRCLE
                 )
             )
             .addStep(
@@ -104,7 +106,8 @@ class ActivityDemo : AppCompatActivity() {
                     title = "Floating Actions",
                     description = "Notice how the tooltip elegantly positions itself to the left (START) or top.",
                     tooltipPosition = TooltipPosition.AUTO,
-                    animationType = AnimationType.BOUNCE
+                    animationType = AnimationType.BOUNCE,
+                    spotlightShape = SpotlightShape.CIRCLE
                 )
             )
             .setListener(object : TourListener {
