@@ -16,6 +16,12 @@ android {
         consumerProguardFiles("consumer-rules.pro")
     }
 
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -134,5 +140,6 @@ dependencies {
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
 
     testImplementation(libs.bundles.testing)
+    testImplementation("org.robolectric:robolectric:4.11.1")
     androidTestImplementation(libs.bundles.android.test)
 }

@@ -75,7 +75,7 @@ internal object TourJsonParser {
                 val skipButtonLabel = stepObj.optString("skipButtonLabel", "Skip")
                 val previousButtonLabel = stepObj.optString("previousButtonLabel", "Back")
 
-                val tag = stepObj.optString("tag", null).takeIf { it.isNotEmpty() }
+                val tag = stepObj.optString("tag", "").takeIf { it.isNotEmpty() }
 
                 steps.add(
                     GuideStep(

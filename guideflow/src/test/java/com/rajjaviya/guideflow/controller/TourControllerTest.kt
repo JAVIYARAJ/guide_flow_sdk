@@ -147,6 +147,42 @@ class TourControllerTest {
     }
 
     @Test
+    fun `start skips steps with false conditions`() = runTest {
+        val falseStep = mockk<GuideStep>(relaxed = true) {
+            every { condition } returns { false }
+        }
+        val controller = makeController(makeSession(falseStep, step2))
+        controller.start()
+        val state = controller.state.value as TourState.Active
+        assertEquals(1, state.currentIndex) // skipped index 0
+    }
+
+    @Test
+    fun `next skips steps with false conditions`() = runTest {
+        val falseStep = mockk<GuideStep>(relaxed = true) {
+            every { condition } returns { false }
+        }
+        val controller = makeController(makeSession(step1, falseStep, step3))
+        controller.start()
+        controller.next() // Should go to 2, skipping 1
+        val state = controller.state.value as TourState.Active
+        assertEquals(2, state.currentIndex)
+    }
+
+    @Test
+    fun `previous skips steps with false conditions`() = runTest {
+        val falseStep = mockk<GuideStep>(relaxed = true) {
+            every { condition } returns { false }
+        }
+        val controller = makeController(makeSession(step1, falseStep, step3))
+        controller.start() // at 0
+        controller.next() // skips to 2
+        controller.previous() // from 2, should go back to 0, skipping 1
+        val state = controller.state.value as TourState.Active
+        assertEquals(0, state.currentIndex)
+    }
+
+    @Test
     fun `skip transitions to Dismissed with correct index`() = runTest {
         val controller = makeController(makeSession(step1, step2))
         controller.start()
