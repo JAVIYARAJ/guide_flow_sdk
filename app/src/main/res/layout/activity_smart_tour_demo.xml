@@ -8,21 +8,7 @@
     android:orientation="vertical"
     android:background="#F8FAFC">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        app:elevation="2dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:title="Smart Tour Engine"
-            app:titleCentered="true"
-            app:navigationIcon="?attr/homeAsUpIndicator"
-            app:titleTextColor="#0F172A" />
-    </com.google.android.material.appbar.AppBarLayout>
+    <include layout="@layout/layout_standard_app_bar" />
 
     <ScrollView
         android:layout_width="match_parent"

@@ -1,7 +1,12 @@
 package com.rajjaviya.guideflow.overlay
 
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.os.Build
+import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.rajjaviya.guideflow.host.TourHost
@@ -43,13 +48,16 @@ internal class OverlayManager(
      */
     private var boundsJob: Job? = null
 
+    private var blurredBitmap: android.graphics.Bitmap? = null
+    private var blurredCanvas: android.graphics.Canvas? = null
+
     // -------------------------------------------------------------------------
     // Start
     // -------------------------------------------------------------------------
 
     fun start() {
-        lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
                 teardown()
             }
         })
@@ -82,7 +90,7 @@ internal class OverlayManager(
 
     private fun onActive(state: TourState.Active) {
         val session = state.session
-        ensureOverlayAttached(session.config)
+        ensureOverlayAttached(session)
 
         val overlay = overlayView ?: return
         overlay.applyTheme(session.theme)
@@ -96,6 +104,25 @@ internal class OverlayManager(
                 config = session.config,
                 step = state.currentStep,
             ).collect { spotlight ->
+                if (state.currentStep.animationType == com.rajjaviya.guideflow.animation.AnimationType.GLASSMORPHISM && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    val root = host.getRootView()
+                    val w = root.width
+                    val h = root.height
+                    if (w > 0 && h > 0) {
+                        if (blurredBitmap == null || blurredBitmap!!.width != w || blurredBitmap!!.height != h) {
+                            blurredBitmap?.recycle()
+                            blurredBitmap = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888)
+                            blurredCanvas = android.graphics.Canvas(blurredBitmap!!)
+                        }
+                        val prevVisibility = overlay.visibility
+                        overlay.visibility = View.INVISIBLE
+                        blurredBitmap!!.eraseColor(android.graphics.Color.TRANSPARENT)
+                        root.draw(blurredCanvas!!)
+                        overlay.visibility = prevVisibility
+                        overlay.setBlurredBackground(blurredBitmap!!)
+                    }
+                }
+
                 // isFirstStep flag skips animation on the very first step.
                 overlay.updateSpotlight(
                     bounds = spotlight,
@@ -121,8 +148,9 @@ internal class OverlayManager(
     // Attach / Detach
     // -------------------------------------------------------------------------
 
-    private fun ensureOverlayAttached(config: TourConfig) {
+    private fun ensureOverlayAttached(session: com.rajjaviya.guideflow.model.TourSession) {
         if (overlayView != null) return
+        val config = session.config
 
         val root: ViewGroup = host.getRootView()
         val view = GuideOverlayView(host.getContext()).apply {
@@ -142,6 +170,7 @@ internal class OverlayManager(
         
         tooltipRenderer = TooltipRenderer(
             overlayContainer = view, // GuideOverlayView is a FrameLayout
+            provider = session.tooltipViewProvider,
             onNext = onNext,
             onPrevious = onPrevious,
             onSkip = onDismissRequested,
@@ -156,5 +185,9 @@ internal class OverlayManager(
         overlayView?.let { (it.parent as? ViewGroup)?.removeView(it) }
         overlayView = null
         isFirstStep = true
+        
+        blurredBitmap?.recycle()
+        blurredBitmap = null
+        blurredCanvas = null
     }
 }

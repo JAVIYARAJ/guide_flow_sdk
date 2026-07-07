@@ -12,7 +12,7 @@ import com.rajjaviya.guideflow.spotlight.SpotlightShape
  *     .setConfig(
  *         TourConfig(
  *             dismissOnOverlayClick = false,
- *             showStepIndicator     = true,
+ *             stepIndicatorStyle    = StepIndicatorStyle.TEXT,
  *         )
  *     )
  *     .addStep(...)
@@ -21,7 +21,7 @@ import com.rajjaviya.guideflow.spotlight.SpotlightShape
  *
  * @property dismissOnOverlayClick  Whether tapping outside the spotlight dismisses the tour.
  * @property dismissOnBackPress     Whether the device back button dismisses the tour.
- * @property showStepIndicator      Whether to show a step counter (e.g. "2 / 5") in the tooltip.
+ * @property stepIndicatorStyle     The style of the progress indicator shown in the tooltip (NONE, TEXT, DOTS, LINEAR).
  * @property enablePreviousButton   Whether to show a "Back" button on non-first steps.
  * @property spotlightPadding       Extra space (dp) added around the target view spotlight.
  * @property spotlightCornerRadius  Corner radius (dp) for a rounded-rect spotlight.
@@ -38,7 +38,7 @@ import com.rajjaviya.guideflow.spotlight.SpotlightShape
 data class TourConfig(
     val dismissOnOverlayClick: Boolean = true,
     val dismissOnBackPress: Boolean = true,
-    val showStepIndicator: Boolean = false,
+    val stepIndicatorStyle: StepIndicatorStyle = StepIndicatorStyle.NONE,
     val enablePreviousButton: Boolean = false,
     val spotlightPadding: Int = 16,
     val spotlightCornerRadius: Int = 8,
@@ -67,7 +67,7 @@ data class TourConfig(
          * Good for feature-discovery tours where the user wants to explore freely.
          */
         fun showcase(): TourConfig = TourConfig(
-            showStepIndicator = true,
+            stepIndicatorStyle = StepIndicatorStyle.TEXT,
             enablePreviousButton = true,
         )
     }

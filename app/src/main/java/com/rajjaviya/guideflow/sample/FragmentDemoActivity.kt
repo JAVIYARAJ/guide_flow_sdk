@@ -11,39 +11,17 @@ import androidx.core.graphics.toColorInt
 class FragmentDemoActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        val layout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-        }
-        
-        val toolbar = MaterialToolbar(this).apply {
-            title = "Fragment Support"
-            setTitleTextColor(android.graphics.Color.WHITE)
-            setBackgroundColor("#3B82F6".toColorInt())
-        }
+        setContentView(R.layout.activity_fragment_demo)
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        supportActionBar?.title = "Fragment Support"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
-        
-        layout.addView(toolbar, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ))
-        
-        val frameLayout = FrameLayout(this).apply {
-            id = View.generateViewId()
-        }
-        layout.addView(frameLayout, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            0,
-            1f
-        ))
-        
-        setContentView(layout)
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
-                .replace(frameLayout.id, DemoFragment())
+                .replace(R.id.fragmentContainer, DemoFragment())
                 .commit()
         }
     }

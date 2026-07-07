@@ -18,4 +18,10 @@ enum class AnimationType {
 
     /** No animation — instant transition. */
     NONE,
+
+    /** Applies a true physics-based spring bounce to the tooltip entry. */
+    SPRING_PHYSICS,
+
+    /** Blurs the background natively on Android 12+. Uses a standard fade for the tooltip. */
+    GLASSMORPHISM
 }

@@ -131,6 +131,7 @@ dependencies {
     implementation(libs.androidx.coordinatorlayout)
     implementation(libs.androidx.lifecycle.runtime)
     implementation(libs.bundles.coroutines)
+    implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
 
     testImplementation(libs.bundles.testing)
     androidTestImplementation(libs.bundles.android.test)

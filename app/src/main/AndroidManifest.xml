@@ -29,5 +29,8 @@
         <activity android:name=".NavigationDemoActivity" />
         <activity android:name=".SmartTourDemoActivity" />
         <activity android:name=".JsonTourDemoActivity" />
+        <activity android:name=".CustomViewDemoActivity" />
+        <activity android:name=".GlassmorphismDemoActivity" />
+        <activity android:name=".StepIndicatorDemoActivity" />
     </application>
 </manifest>

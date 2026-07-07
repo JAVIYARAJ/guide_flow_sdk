@@ -101,6 +101,32 @@ GuideStep(
 )
 ```
 
+## 🖌 Custom View Injection
+
+Need something fully bespoke? GuideFlow supports injecting completely custom UIs directly into the tooltip engine.
+
+### 1. Step-Level Content Injection
+Inject any XML layout directly into the default tooltip bubble while keeping the built-in arrows, animations, and buttons. This is perfect for inserting Lottie animations or custom styling.
+```kotlin
+GuideStep(
+    targetView = myButton,
+    customContentLayoutRes = R.layout.my_custom_lottie_step // <--- Overrides default title/desc
+)
+```
+
+### 2. Fully Custom Tooltip Provider
+Need to bypass the SDK's design system entirely? Provide your own View factory for absolute control over the tooltip rendering pipeline.
+```kotlin
+GuideFlow.with(this)
+    .setTooltipViewProvider(object : TooltipViewProvider {
+        override fun getView(..., onNext: () -> Unit, onSkip: () -> Unit): View {
+            // Inflate your strict design system layout and hook up clicks manually!
+            return myView
+        }
+    })
+    .start()
+```
+
 ## 📜 JSON-Driven Tours
 
 GuideFlow can build entire tours directly from a JSON payload. This is perfect for remote onboarding, A/B testing, or updating marketing tutorials without releasing a new app update.
@@ -183,7 +209,8 @@ val config = TourConfig(
     enablePreviousButton = true,   // Allow navigating backwards
     scrollToTarget = true,         // Auto-scroll RecyclerViews
     spotlightShape = SpotlightShape.CIRCLE,
-    spotlightPadding = 24          // dp
+    spotlightPadding = 24,         // dp
+    stepIndicatorStyle = StepIndicatorStyle.DOTS // Show progress as iOS-style dots
 )
 ```
 

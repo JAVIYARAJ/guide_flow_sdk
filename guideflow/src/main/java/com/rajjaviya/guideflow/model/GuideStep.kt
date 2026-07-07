@@ -21,6 +21,8 @@ import com.rajjaviya.guideflow.spotlight.SpotlightShape
  * @property pointerOffset    Offset (0.0 to 1.0) of where the arrow points on the spotlight. Default 0.5 (center).
  * @property spotlightShape   Optional shape for this step's spotlight. Overrides the global TourConfig shape if provided.
  * @property tag              Optional identifier for analytics or testing.
+ * @property customContentLayoutRes Optional layout resource to inflate inside the tooltip instead of title/description.
+ * @property customContentView Optional custom view instance to inject inside the tooltip instead of title/description.
  */
 data class GuideStep(
     val targetView: View,
@@ -37,4 +39,6 @@ data class GuideStep(
     val spotlightShape: SpotlightShape? = null,
     val condition: () -> Boolean = { true },
     val tag: String? = null,
+    @androidx.annotation.LayoutRes val customContentLayoutRes: Int? = null,
+    val customContentView: View? = null,
 )

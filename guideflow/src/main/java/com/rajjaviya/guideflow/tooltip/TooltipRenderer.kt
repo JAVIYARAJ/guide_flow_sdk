@@ -15,12 +15,13 @@ import com.rajjaviya.guideflow.spotlight.SpotlightBounds
  */
 internal class TooltipRenderer(
     private val overlayContainer: ViewGroup,
+    private val provider: TooltipViewProvider?,
     private val onNext: () -> Unit,
     private val onPrevious: () -> Unit,
     private val onSkip: () -> Unit,
 ) {
 
-    private var tooltipView: TooltipView? = null
+    private var currentView: android.view.View? = null
 
     /**
      * Creates (if needed), updates, and positions the tooltip.
@@ -34,18 +35,42 @@ internal class TooltipRenderer(
         totalSteps: Int,
         spotlight: SpotlightBounds,
     ) {
-        val view = ensureTooltipView()
+        val view = if (provider != null) {
+            val v = provider.getView(
+                context = overlayContainer.context,
+                step = step,
+                theme = theme,
+                config = config,
+                currentIndex = currentIndex,
+                totalSteps = totalSteps,
+                onNext = onNext,
+                onPrevious = onPrevious,
+                onSkip = onSkip
+            )
+            // Add to overlay container if not already attached
+            if (v.parent == null) {
+                overlayContainer.addView(v)
+            } else if (v.parent != overlayContainer) {
+                (v.parent as? ViewGroup)?.removeView(v)
+                overlayContainer.addView(v)
+            }
+            v
+        } else {
+            val v = ensureDefaultTooltipView()
+            v.bind(
+                step = step,
+                theme = theme,
+                config = config,
+                currentIndex = currentIndex,
+                totalSteps = totalSteps,
+                onNext = onNext,
+                onPrevious = onPrevious,
+                onSkip = onSkip,
+            )
+            v
+        }
         
-        view.bind(
-            step = step,
-            theme = theme,
-            config = config,
-            isFirstStep = currentIndex == 0,
-            isLastStep = currentIndex == totalSteps - 1,
-            onNext = onNext,
-            onPrevious = onPrevious,
-            onSkip = onSkip,
-        )
+        currentView = view
 
         val containerWidth = if (overlayContainer.width > 0) overlayContainer.width else overlayContainer.resources.displayMetrics.widthPixels
         val containerHeight = if (overlayContainer.height > 0) overlayContainer.height else overlayContainer.resources.displayMetrics.heightPixels
@@ -82,14 +107,14 @@ internal class TooltipRenderer(
 
     /** Hides and cleans up the tooltip. */
     fun clear() {
-        tooltipView?.let { view ->
+        currentView?.let { view ->
             overlayContainer.removeView(view)
         }
-        tooltipView = null
+        currentView = null
     }
 
-    private fun ensureTooltipView(): TooltipView {
-        tooltipView?.let { return it }
+    private fun ensureDefaultTooltipView(): TooltipView {
+        (currentView as? TooltipView)?.let { return it }
 
         val view = TooltipView(overlayContainer.context)
         
@@ -104,13 +129,13 @@ internal class TooltipRenderer(
         params.setMargins(margin, margin, margin, margin)
         
         overlayContainer.addView(view, params)
-        tooltipView = view
+        currentView = view
         return view
     }
 
     @Suppress("LongParameterList", "CyclomaticComplexMethod", "LongMethod")
     private fun positionTooltip(
-        view: TooltipView,
+        view: android.view.View,
         preferredPosition: TooltipPosition,
         spotlightBounds: RectF,
         containerWidth: Int,
@@ -221,8 +246,11 @@ internal class TooltipRenderer(
             pointerX - x
         }
         
-        // We pass the position resolved here (e.g. TooltipPosition.BOTTOM means tooltip is below the view)
-        view.setupArrow(position, arrowOffset, theme)
+        if (provider != null) {
+            provider.setupArrow(position, arrowOffset, theme)
+        } else if (view is TooltipView) {
+            view.setupArrow(position, arrowOffset, theme)
+        }
         
         com.rajjaviya.guideflow.animation.StepAnimator.animateEnter(view, animationType)
 

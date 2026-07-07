@@ -19,6 +19,7 @@ import com.rajjaviya.guideflow.model.TourConfig
 import com.rajjaviya.guideflow.model.TourTheme
 import com.rajjaviya.guideflow.storage.TourPreferences
 import android.content.Context
+import com.rajjaviya.guideflow.tooltip.TooltipViewProvider
 
 /**
  * # GuideFlow
@@ -160,6 +161,7 @@ class GuideFlowBuilder internal constructor(private val host: TourHost) {
     private var tourId: String? = null
     private var theme: TourTheme = TourTheme.light()
     private var config: TourConfig = TourConfig.default()
+    private var tooltipViewProvider: TooltipViewProvider? = null
     private var listener: TourListener? = null
 
     // ------------------------------------------------------------------
@@ -266,6 +268,14 @@ class GuideFlowBuilder internal constructor(private val host: TourHost) {
     fun setConfig(config: TourConfig): GuideFlowBuilder = apply { this.config = config }
 
     /**
+     * Sets a custom [TooltipViewProvider] to completely replace the SDK's tooltip UI.
+     * This is useful for companies with strict design systems that need to provide 
+     * their own layouts, buttons, and animations for the entire tour.
+     */
+    fun setTooltipViewProvider(provider: TooltipViewProvider): GuideFlowBuilder = 
+        apply { this.tooltipViewProvider = provider }
+
+    /**
      * Attaches a [TourListener] to receive tour lifecycle callbacks.
      */
     fun setListener(listener: TourListener): GuideFlowBuilder =
@@ -303,6 +313,7 @@ class GuideFlowBuilder internal constructor(private val host: TourHost) {
             tourId = tourId,
             theme = theme,
             config = config,
+            tooltipViewProvider = tooltipViewProvider,
             listener = listener,
         ).also { it.start() }
     }

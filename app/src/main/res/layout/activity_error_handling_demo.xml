@@ -5,19 +5,7 @@
     android:layout_height="match_parent"
     android:background="#F0F4F8">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="4dp">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="#EF4444"
-            app:title="Error Handling Demo"
-            app:titleTextColor="#FFFFFF" />
-    </com.google.android.material.appbar.AppBarLayout>
+    <include layout="@layout/layout_standard_app_bar" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

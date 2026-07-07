@@ -6,11 +6,14 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.ProgressBar
 import com.rajjaviya.guideflow.model.GuideStep
+import com.rajjaviya.guideflow.model.StepIndicatorStyle
 import com.rajjaviya.guideflow.model.TourConfig
 import com.rajjaviya.guideflow.model.TourTheme
 import com.rajjaviya.guideflow.util.dpToPx
@@ -80,9 +83,20 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
             }
         }
         clipToOutline = true
+        clipChildren = false
+        clipToPadding = false
     }
     
     private val arrowView = ArrowView(context)
+
+    private val indicatorContainer = FrameLayout(context).apply {
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply {
+            bottomMargin = dpToPx(12)
+        }
+    }
 
     private val titleView = TextView(context).apply {
         textSize = 20f
@@ -107,6 +121,16 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         }
     }
 
+    private val customContentContainer = FrameLayout(context).apply {
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+        ).apply {
+            bottomMargin = dpToPx(24)
+        }
+        visibility = GONE
+    }
+
     private val buttonsRow = LinearLayout(context).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
@@ -114,6 +138,8 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT,
         )
+        clipChildren = false
+        clipToPadding = false
     }
 
     private val skipButton = TextView(context).apply {
@@ -147,6 +173,8 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         isClickable = true
         isFocusable = true
     }
+    
+    private var nextButtonAnimator: android.animation.ValueAnimator? = null
 
     init {
         clipChildren = false
@@ -155,8 +183,10 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         addView(arrowView) // Add arrow first so it draws BEHIND the container
         addView(container)
         
+        container.addView(indicatorContainer)
         container.addView(titleView)
         container.addView(descriptionView)
+        container.addView(customContentContainer)
         container.addView(buttonsRow)
 
         buttonsRow.addView(skipButton)
@@ -170,8 +200,8 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         step: GuideStep,
         theme: TourTheme,
         config: TourConfig,
-        isFirstStep: Boolean,
-        isLastStep: Boolean,
+        currentIndex: Int,
+        totalSteps: Int,
         onNext: () -> Unit,
         onPrevious: () -> Unit,
         onSkip: () -> Unit,
@@ -182,24 +212,65 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         container.layoutParams = params
         arrowView.visibility = GONE
 
+        val isFirstStep = currentIndex == 0
+        val isLastStep = currentIndex == totalSteps - 1
+
+        // --- Indicator ---
+        setupIndicator(config.stepIndicatorStyle, theme, currentIndex, totalSteps)
+
         // --- Content ---
-        if (step.title.isNullOrBlank()) {
+        if (step.customContentView != null || step.customContentLayoutRes != null) {
             titleView.visibility = GONE
+            descriptionView.visibility = GONE
+            customContentContainer.visibility = VISIBLE
+            customContentContainer.removeAllViews()
+            
+            if (step.customContentView != null) {
+                // If it already has a parent, remove it first
+                (step.customContentView.parent as? ViewGroup)?.removeView(step.customContentView)
+                customContentContainer.addView(step.customContentView)
+            } else if (step.customContentLayoutRes != null) {
+                LayoutInflater.from(context).inflate(step.customContentLayoutRes, customContentContainer, true)
+            }
         } else {
-            titleView.visibility = VISIBLE
-            titleView.text = step.title
+            customContentContainer.visibility = GONE
+            if (step.title.isNullOrBlank()) {
+                titleView.visibility = GONE
+            } else {
+                titleView.visibility = VISIBLE
+                titleView.text = step.title
+            }
+    
+            if (step.description.isNullOrBlank()) {
+                descriptionView.visibility = GONE
+            } else {
+                descriptionView.visibility = VISIBLE
+                descriptionView.text = step.description
+            }
         }
 
-        if (step.description.isNullOrBlank()) {
-            descriptionView.visibility = GONE
-        } else {
-            descriptionView.visibility = VISIBLE
-            descriptionView.text = step.description
-        }
+        // --- Next Button Pulse Animation ---
+        nextButtonAnimator?.cancel()
+        nextButton.scaleX = 1f
+        nextButton.scaleY = 1f
 
         if (step.showNextButton) {
             nextButton.visibility = VISIBLE
             nextButton.text = if (isLastStep) "Finish" else step.nextButtonLabel
+            
+            // Subtle 5% pulse after 3 seconds of inactivity
+            nextButtonAnimator = android.animation.ValueAnimator.ofFloat(1f, 1.05f).apply {
+                duration = 800L
+                startDelay = 3000L
+                repeatCount = android.animation.ValueAnimator.INFINITE
+                repeatMode = android.animation.ValueAnimator.REVERSE
+                addUpdateListener { animator ->
+                    val scale = animator.animatedValue as Float
+                    nextButton.scaleX = scale
+                    nextButton.scaleY = scale
+                }
+                start()
+            }
         } else {
             nextButton.visibility = GONE
         }
@@ -232,6 +303,99 @@ internal class TooltipView(context: Context) : FrameLayout(context) {
         }
         if (announcement.isNotBlank()) {
             announceForAccessibility(announcement)
+        }
+    }
+
+    private fun setupIndicator(
+        style: StepIndicatorStyle,
+        theme: TourTheme,
+        currentIndex: Int,
+        totalSteps: Int
+    ) {
+        indicatorContainer.removeAllViews()
+        
+        if (style == StepIndicatorStyle.NONE || totalSteps <= 1) {
+            indicatorContainer.visibility = GONE
+            return
+        }
+        
+        indicatorContainer.visibility = VISIBLE
+
+        when (style) {
+            StepIndicatorStyle.TEXT -> {
+                val tv = TextView(context).apply {
+                    text = "${currentIndex + 1} of $totalSteps"
+                    textSize = 13f
+                    setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL))
+                    setTextColor(theme.tooltipDescriptionColor)
+                    alpha = 0.7f
+                    layoutParams = FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        Gravity.START or Gravity.CENTER_VERTICAL
+                    )
+                }
+                indicatorContainer.addView(tv)
+            }
+            StepIndicatorStyle.DOTS -> {
+                val dotsContainer = LinearLayout(context).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    layoutParams = FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        FrameLayout.LayoutParams.WRAP_CONTENT,
+                        Gravity.START or Gravity.CENTER_VERTICAL
+                    )
+                }
+                
+                for (i in 0 until totalSteps) {
+                    val dot = android.view.View(context).apply {
+                        layoutParams = LinearLayout.LayoutParams(dpToPx(6), dpToPx(6)).apply {
+                            marginEnd = if (i == totalSteps - 1) 0 else dpToPx(6)
+                        }
+                        background = GradientDrawable().apply {
+                            shape = GradientDrawable.OVAL
+                            setColor(if (i == currentIndex) theme.nextButtonColor else theme.tooltipDescriptionColor)
+                            alpha = if (i == currentIndex) 255 else 76 // 30% opacity for inactive
+                        }
+                    }
+                    dotsContainer.addView(dot)
+                }
+                indicatorContainer.addView(dotsContainer)
+            }
+            StepIndicatorStyle.LINEAR -> {
+                val pb = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
+                    layoutParams = FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        dpToPx(4),
+                        Gravity.CENTER_VERTICAL
+                    )
+                    max = totalSteps
+                    progress = currentIndex + 1
+                    
+                    progressDrawable = android.graphics.drawable.LayerDrawable(arrayOf(
+                        GradientDrawable().apply {
+                            shape = GradientDrawable.RECTANGLE
+                            setColor(theme.tooltipDescriptionColor)
+                            alpha = 50
+                            setCornerRadius(dpToPx(2).toFloat())
+                        },
+                        android.graphics.drawable.ClipDrawable(
+                            GradientDrawable().apply {
+                                shape = GradientDrawable.RECTANGLE
+                                setColor(theme.nextButtonColor)
+                                setCornerRadius(dpToPx(2).toFloat())
+                            },
+                            Gravity.START,
+                            android.graphics.drawable.ClipDrawable.HORIZONTAL
+                        )
+                    )).apply {
+                        setId(0, android.R.id.background)
+                        setId(1, android.R.id.progress)
+                    }
+                }
+                indicatorContainer.addView(pb)
+            }
+            else -> {}
         }
     }
 

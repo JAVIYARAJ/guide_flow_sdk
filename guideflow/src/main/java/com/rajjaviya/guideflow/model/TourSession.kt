@@ -18,6 +18,7 @@ data class TourSession(
     val tourId: String? = null,
     val theme: TourTheme = TourTheme.light(),
     val config: TourConfig = TourConfig.default(),
+    val tooltipViewProvider: com.rajjaviya.guideflow.tooltip.TooltipViewProvider? = null,
     val startedAt: Long = System.currentTimeMillis(),
 ) {
     private val _steps = initialSteps.toMutableList()

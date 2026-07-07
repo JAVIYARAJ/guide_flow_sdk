@@ -18,6 +18,7 @@ import com.rajjaviya.guideflow.model.TourTheme
 import com.rajjaviya.guideflow.spotlight.SpotlightShape
 import com.rajjaviya.guideflow.tooltip.TooltipPosition
 import com.rajjaviya.guideflow.listener.TourListener
+import com.rajjaviya.guideflow.model.StepIndicatorStyle
 import com.rajjaviya.guideflow.model.TourSession
 
 class ActivityDemo : AppCompatActivity() {
@@ -32,6 +33,7 @@ class ActivityDemo : AppCompatActivity() {
         val fab = findViewById<FloatingActionButton>(R.id.fab)
 
         setSupportActionBar(toolbar)
+        supportActionBar?.title = "Activity & Views Demo"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
 

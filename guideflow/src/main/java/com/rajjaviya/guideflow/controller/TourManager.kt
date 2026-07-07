@@ -34,6 +34,7 @@ class TourManager internal constructor(
     tourId: String?,
     theme: TourTheme,
     config: TourConfig,
+    tooltipViewProvider: com.rajjaviya.guideflow.tooltip.TooltipViewProvider?,
     listener: TourListener?,
 ) {
 
@@ -42,6 +43,7 @@ class TourManager internal constructor(
         tourId = tourId,
         theme = theme,
         config = config,
+        tooltipViewProvider = tooltipViewProvider,
     )
 
     private val controller = TourController(

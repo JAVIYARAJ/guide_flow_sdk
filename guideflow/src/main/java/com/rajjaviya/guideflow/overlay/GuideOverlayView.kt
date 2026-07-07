@@ -70,13 +70,17 @@ internal class GuideOverlayView @JvmOverloads constructor(
     /** Called when the user taps outside the spotlight area. */
     var onOutsideTapped: (() -> Unit)? = null
 
+    private var blurredBgBitmap: android.graphics.Bitmap? = null
+    private var blurRenderNode: android.graphics.RenderNode? = null
+
     // -------------------------------------------------------------------------
     // Init
     // -------------------------------------------------------------------------
 
     init {
-        // Required for Porter-Duff CLEAR to work correctly on this view.
-        setLayerType(LAYER_TYPE_SOFTWARE, null)
+        // Required for Porter-Duff CLEAR to work without clearing the window background.
+        // LAYER_TYPE_HARDWARE is required for RenderEffect (Glassmorphism) to work.
+        setLayerType(LAYER_TYPE_HARDWARE, null)
         setWillNotDraw(false)
     }
 
@@ -173,15 +177,41 @@ internal class GuideOverlayView @JvmOverloads constructor(
         }
     }
 
+    @androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.S)
+    fun setBlurredBackground(bitmap: android.graphics.Bitmap) {
+        blurredBgBitmap = bitmap
+        if (blurRenderNode == null) {
+            blurRenderNode = android.graphics.RenderNode("GuideBlurNode").apply {
+                setRenderEffect(android.graphics.RenderEffect.createBlurEffect(32f, 32f, android.graphics.Shader.TileMode.CLAMP))
+            }
+        }
+        blurRenderNode?.apply {
+            setPosition(0, 0, bitmap.width, bitmap.height)
+            val canvas = beginRecording()
+            canvas.drawBitmap(bitmap, 0f, 0f, null)
+            endRecording()
+        }
+        invalidate()
+    }
+
     // -------------------------------------------------------------------------
     // Drawing
     // -------------------------------------------------------------------------
 
     override fun onDraw(canvas: Canvas) {
-        // 1. Dim the entire overlay
+        // 1. Draw blurred background if available
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            blurRenderNode?.let { node ->
+                if (canvas.isHardwareAccelerated) {
+                    canvas.drawRenderNode(node)
+                }
+            }
+        }
+
+        // 2. Dim the entire overlay
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), dimPaint)
 
-        // 2. Punch out the spotlight cutout (only when bounds are set)
+        // 3. Punch out the spotlight cutout (only when bounds are set)
         if (!currentBounds.isEmpty) {
             val cx = currentBounds.centerX()
             val cy = currentBounds.centerY()

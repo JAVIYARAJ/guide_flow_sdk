@@ -17,37 +17,16 @@ class ListDemoActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        val mainLayout = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Color.parseColor("#F1F5F9"))
-        }
+        setContentView(R.layout.activity_list_demo)
 
-        val toolbar = MaterialToolbar(this).apply {
-            title = "Auto-Scroll Targeting"
-            setTitleTextColor(Color.WHITE)
-            setBackgroundColor(Color.parseColor("#3B82F6"))
-        }
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        supportActionBar?.title = "Auto-Scroll Targeting"
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener { finish() }
 
-        mainLayout.addView(toolbar, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ))
-        
-        val scrollView = NestedScrollView(this)
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(32, 32, 32, 32)
-        }
-        
-        scrollView.addView(container)
-        mainLayout.addView(scrollView, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
-        ))
-        setContentView(mainLayout)
+        val scrollView = findViewById<NestedScrollView>(R.id.scrollView)
+        val container = findViewById<LinearLayout>(R.id.container)
 
         val views = mutableListOf<MaterialCardView>()
         for (i in 0..30) {

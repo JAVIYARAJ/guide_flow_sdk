@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.rajjaviya.guideflow.api.GuideFlow
+import com.rajjaviya.guideflow.model.StepIndicatorStyle
 import com.rajjaviya.guideflow.model.TourConfig
 
 class JsonTourDemoActivity : AppCompatActivity() {
@@ -14,6 +15,7 @@ class JsonTourDemoActivity : AppCompatActivity() {
 
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        supportActionBar?.title = "JSON-Driven Tour"
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         val btnFetchTour = findViewById<Button>(R.id.btnFetchTour)
@@ -81,7 +83,7 @@ class JsonTourDemoActivity : AppCompatActivity() {
         GuideFlow.with(this)
             .setTourId("json_demo")
             .setConfig(TourConfig(
-                showStepIndicator = true,
+                stepIndicatorStyle = StepIndicatorStyle.LINEAR,
                 enablePreviousButton = true
             ))
             .loadFromJson(jsonPayload) // <--- LOAD JSON HERE

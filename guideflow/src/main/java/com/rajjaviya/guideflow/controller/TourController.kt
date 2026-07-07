@@ -1,6 +1,7 @@
 package com.rajjaviya.guideflow.controller
 
-import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.rajjaviya.guideflow.listener.TourListener
 import com.rajjaviya.guideflow.model.TourSession
@@ -57,8 +58,8 @@ internal class TourController(
     private var currentIndex = 0
 
     init {
-        lifecycleOwner.lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onDestroy(owner: LifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
                 // Host is destroyed — cancel silently without firing listener callbacks.
                 _state.value = TourState.Idle
             }

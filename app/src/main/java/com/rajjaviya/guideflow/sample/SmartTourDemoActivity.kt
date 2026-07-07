@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.rajjaviya.guideflow.api.GuideFlow
 import com.rajjaviya.guideflow.model.GuideStep
+import com.rajjaviya.guideflow.model.StepIndicatorStyle
 import com.rajjaviya.guideflow.model.TourConfig
 
 class SmartTourDemoActivity : AppCompatActivity() {
@@ -18,6 +19,7 @@ class SmartTourDemoActivity : AppCompatActivity() {
 
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
+        supportActionBar?.title = "Smart Tour Engine"
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         val btnStandard = findViewById<View>(R.id.btnStandard)
@@ -47,8 +49,8 @@ class SmartTourDemoActivity : AppCompatActivity() {
         GuideFlow.with(this)
             .setTourId("smart_tour")
             .setConfig(TourConfig(
-                showStepIndicator = true,
-                enablePreviousButton = true,
+                stepIndicatorStyle = StepIndicatorStyle.DOTS,
+                enablePreviousButton = true
             ))
             .addStep(GuideStep(
                 targetView = profile,

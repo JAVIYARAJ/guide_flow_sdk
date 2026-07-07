@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,11 +35,21 @@ class MainActivity : AppCompatActivity() {
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardJsonTourDemo).setOnClickListener {
             startActivity(Intent(this, JsonTourDemoActivity::class.java))
         }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardCustomViewDemo).setOnClickListener {
+            startActivity(Intent(this, CustomViewDemoActivity::class.java))
+        }
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardNavigationDemo).setOnClickListener {
             startActivity(Intent(this, NavigationDemoActivity::class.java))
         }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardGlassmorphismDemo).setOnClickListener {
+            startActivity(Intent(this, GlassmorphismDemoActivity::class.java))
+        }
+        findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardStepIndicatorDemo).setOnClickListener {
+            startActivity(Intent(this, StepIndicatorDemoActivity::class.java))
+        }
         findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardGithub).setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://github.com/JAVIYARAJ/guide_flow_sdk")))
+            startActivity(Intent(Intent.ACTION_VIEW,
+                "https://github.com/JAVIYARAJ/guide_flow_sdk".toUri()))
         }
     }
 }
